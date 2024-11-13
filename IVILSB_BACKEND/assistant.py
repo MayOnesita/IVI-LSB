@@ -5,41 +5,66 @@ import difflib
 # ----------------------------------------------------------------
 # FUNCTIONS
 
-def load_file(file):
-    with open(file, 'r', encoding='utf-8') as file:
+def load_file(filepath):
+    """
+    Load the contents of a file.
+    Returns the contents as a string.
+    """
+    with open(filepath, 'r', encoding='utf-8') as file:
         glossary_data = file.read()
     return glossary_data
 
-def text_to_list(text):
-    return text.split()
-
 def clean_text(text):
+    """
+    Clean the input text by converting it to lowercase and removing punctuation.
+    Returns the cleaned text.
+    """
     res = text
-    # lower the text 
+    # Convert text to lowercase
     res = res.lower()
-    # remove punctuation
+    # Remove specified punctuation characters
     for char in ",;:!¡()[]{}":
         res = res.replace(char, "")
     return res
 
 def check_sentence(dictionary, sentence):
+    """
+    Check a sentence for words that are not present in the provided dictionary.
+
+    Args:
+        dictionary (list): A list of valid words.
+        sentence (list): A list of words from the sentence to be checked.
+
+    Returns:
+        list: A list of unknown words not found in the dictionary.
+    """
     unknown_words = []
     for word in sentence:
-        # if the word is a single letter, accept it
+        # Accept single-letter alphabetic words
         if len(word) == 1 and word.isalpha():
             continue
-        # if the word is a single number, accept it
+        # Accept single-number words
         if len(word) == 1 and word.isnumeric():
             continue
-        # if the word is a point, accept it
+        # Accept punctuation points
         if word == ".":
             continue
-        # if the word is not in the dictionary, add it to the list
+        # Add word to unknown_words if not in dictionary
         if word not in dictionary:
             unknown_words.append(word)
     return unknown_words
 
 def find_similar_word(dictionary, word):
+    """
+    Find words in the dictionary that are similar to the given word.
+
+    Args:
+        dictionary (list): A list of valid words.
+        word (str): The word to find similar matches for.
+
+    Returns:
+        list or None: A list of similar words if found, otherwise None.
+    """
     word = word.lower().replace(" ", "_")
     similar_words = difflib.get_close_matches(word, dictionary, n=3, cutoff=0.7)
     if similar_words:
@@ -48,26 +73,33 @@ def find_similar_word(dictionary, word):
         return None 
 
 def interpret(client, thread_id, assistant_id, instructions, dictionary, clean_dictionary, sentence, temperature, top_p):
-    """_summary_
+    """
+    Interpret a sentence using the assistant, ensuring all words comply with the provided dictionary.
+    
+    Execution:
+        - Send the sentence to the assistant.
+        - Check the response for unknown words.
+        - If there are unknown words, find similar words in the dictionary and complete the prompt with them.
+        - Retry the interpretation with the updated prompt. 
+        - Repeat until the response is correct or the maximum number of attempts is reached.
 
     Args:
-        client (_type_): _description_
-        thread_id (_type_): _description_
-        assistant_id (_type_): _description_
-        instructions (_type_): _description_
-        dictionary (_type_): _description_
-        clean_dictionary (_type_): _description_
-        sentence (_type_): _description_
-        temperature (_type_): _description_
-        top_p (_type_): _description_
+        client (openai.OpenAI): The OpenAI API client instance.
+        thread_id (str): The ID of the conversation thread.
+        assistant_id (str): The ID of the assistant to use.
+        instructions (str): Instructions for the assistant.
+        dictionary (list): A list of valid words.
+        clean_dictionary (list): A cleaned list of valid words (lowercase, no punctuation).
+        sentence (str): The sentence to interpret.
+        temperature (float): Sampling temperature for the assistant's response.
+        top_p (float): Nucleus sampling parameter for the assistant's response.
 
     Returns:
-        _type_: _description_
+        str or None: The assistant's interpreted response if successful, otherwise None.
     """
-    
-    correct = False # Check if the response is compliant with LSB
-    intento = 1 # Number of attempts
-    response = None # Response from GPT
+    correct = False  # Flag to check if the response complies with LSB
+    intento = 1      # Number of attempts
+    response = None  # Response from GPT
 
     init_prompt = "INTERPRETA AL LSB: " + sentence
     full_prompt = (
@@ -82,7 +114,6 @@ def interpret(client, thread_id, assistant_id, instructions, dictionary, clean_d
         print("| intento: ", intento, "|")
         print("|_____________|\n")
         intento += 1
-        #print("Prompt: \n\n", full_prompt)
 
         # Send the prompt to the assistant
         response = chatWithGPT(
@@ -95,29 +126,23 @@ def interpret(client, thread_id, assistant_id, instructions, dictionary, clean_d
             top_p=top_p)
         if response:
             print("Response :", response)
-            # Change the format of the response to a list of words
-            original_response = text_to_list(response)
-            clean_response = text_to_list(clean_text(response))
-            #print("Original response: ", original_response)
-            #print("Clean response:    ", clean_response)            
-            # Get the list of (cleaned) words which are not in LSB
+            # Convert response to lists of words
+            original_response = response.split()
+            clean_response = (clean_text(response)).split()
+            # Identify unknown words
             unknown_words = check_sentence(clean_dictionary, clean_response)
             if len(unknown_words) == 0:
                 correct = True
             else:
-                # Additional prompt sentences
+                # Prepare additional prompt sentences for unknown words
                 sentences = []
-                # Remove duplicates
-                unknown_words = list(set(unknown_words))
-                # For each unknown word, find similar words in the dictionary
+                unknown_words = list(set(unknown_words))  # Remove duplicates
                 for clean_word in unknown_words:
-                    # Begin the sentence with the unknown word
+                    # Retrieve the original unclean word
                     original_word = unclean_word(
                         dictionary=original_response, 
                         clean_dictionary=clean_response, 
                         clean_word=clean_word)
-                    #print("Clean unknown word:    ", clean_word)
-                    #print("Original unknown word: ", original_word)
                     sentence = "- " + original_word
                     # Find similar words in the dictionary
                     found_words = find_similar_word(dictionary, original_word)
@@ -139,27 +164,49 @@ def interpret(client, thread_id, assistant_id, instructions, dictionary, clean_d
         else:
             print("No response from GPT.")
             break
-    # At the end of the loop, if the response is not correct, return None
+    # Return None if unable to interpret correctly after retries
     if not correct:
         print("No se pudo interpretar la respuesta.")
         return None
-    # If the response is correct, return the GPT response
     else:
         return response
-    
+
 def unclean_word(dictionary, clean_dictionary, clean_word):
+    """
+    Retrieve the original word corresponding to a cleaned word from the dictionary.
+
+    Args:
+        dictionary (list): The original list of words.
+        clean_dictionary (list): The cleaned list of words.
+        clean_word (str): The cleaned word to find the original for. By cleaned, we mean lowercase and no punctuation.
+
+    Returns:
+        str or None: The original word if found, otherwise None.
+    """
     try:
         index = clean_dictionary.index(clean_word)
         return dictionary[index]
-    except:
+    except ValueError:
         print("ERROR: word not found in dictionary")
         return None
 
 # ----------------------------------------------------------------
 # GPT FUNCTIONS
 
-# Function to create or update the assistant
 def createOrUpdateAssistant(asst_id, asst_name, llm_model, client, instructions):
+    """
+    Create a new assistant or update an existing one with the provided parameters.
+
+    Args:
+        asst_id (str): The ID of the assistant to update. If None, a new assistant is created.
+        asst_name (str): The name of the assistant.
+        llm_model (str): The language model to use for the assistant.
+        client (openai.OpenAI): The OpenAI API client instance.
+        instructions (str): Instructions or prompts for the assistant.
+
+    Returns:
+        str: The ID of the created or updated assistant.
+    """
     try:
         assistant = client.beta.assistants.update(
             assistant_id=asst_id,
@@ -179,8 +226,16 @@ def createOrUpdateAssistant(asst_id, asst_name, llm_model, client, instructions)
         print(f"New assistant created with ID: {assistant.id}")
         return assistant.id
 
-# Function to create a new thread
 def createThread(client):
+    """
+    Create a new conversation thread.
+
+    Args:
+        client (openai.OpenAI): The OpenAI API client instance.
+
+    Returns:
+        str or None: The ID of the created thread, or None if creation failed.
+    """
     try:
         thread = client.beta.threads.create()
         print(f"New thread created with ID: {thread.id}")
@@ -189,8 +244,22 @@ def createThread(client):
         print(f"Error creating thread: {e}")
         return None
 
-# Function to send a prompt to the assistant
 def chatWithGPT(client, thread_id, assistant_id, instructions, user_prompt, temperature, top_p):
+    """
+    Send a user prompt to the assistant and retrieve the response.
+
+    Args:
+        client (openai.OpenAI): The OpenAI API client instance.
+        thread_id (str): The ID of the conversation thread.
+        assistant_id (str): The ID of the assistant to interact with.
+        instructions (str): Instructions for the assistant.
+        user_prompt (str): The user's prompt to send.
+        temperature (float): Sampling temperature for the assistant's response.
+        top_p (float): Nucleus sampling parameter for the assistant's response.
+
+    Returns:
+        str or None: The assistant's response if successful, otherwise None.
+    """
     try:
         print(f"Sending user prompt...")
         message = client.beta.threads.messages.create(
@@ -211,9 +280,22 @@ def chatWithGPT(client, thread_id, assistant_id, instructions, user_prompt, temp
             run_id=run.id)
     except Exception as e:
         print(f"Error during chat: {e}")
+        return None
 
-# Function to wait for the run to complete
 def waitForRunCompletion(client, thread_id, run_id, sleep_interval=5, max_retries=15):
+    """
+    Wait for a run to complete and retrieve the response.
+
+    Args:
+        client (openai.OpenAI): The OpenAI API client instance.
+        thread_id (str): The ID of the conversation thread.
+        run_id (str): The ID of the run to wait for.
+        sleep_interval (int, optional): Seconds to wait between retries. Defaults to 5.
+        max_retries (int, optional): Maximum number of retries. Defaults to 15.
+
+    Returns:
+        str or None: The assistant's response if the run completes successfully, otherwise None.
+    """
     retries = 0
 
     while retries < max_retries:
@@ -228,9 +310,13 @@ def waitForRunCompletion(client, thread_id, run_id, sleep_interval=5, max_retrie
                 )
                 print(f"Run completed in {formatted_elapsed_time}")
                 messages = client.beta.threads.messages.list(thread_id=thread_id)
-                last_message = messages.data[0]
-                response = last_message.content[0].text.value
-                return response
+                if messages.data:
+                    last_message = messages.data[-1]
+                    response = last_message.content
+                    return response
+                else:
+                    print("No messages found in the thread.")
+                    return None
 
         except Exception as e:
             print(f"Error while retrieving the run: {e}")
@@ -239,35 +325,40 @@ def waitForRunCompletion(client, thread_id, run_id, sleep_interval=5, max_retrie
 
         print(f"Waiting for run to complete... (Attempt {retries + 1}/{max_retries})")
         time.sleep(sleep_interval)
-        retries += 1
     
     print("Max retries reached. Exiting wait loop.")
     return None
 
-
 # ----------------------------------------------------------------
 # MAIN EXECUTION
 
-def asst_init(
-        dict_path, 
-        inst_path, 
-        asst_id, 
-        asst_name, 
-        llm_model):
-    
+def asst_init(dict_path, inst_path, asst_id, asst_name, llm_model):
+    """
+    Initialize the assistant by loading necessary data and setting up the assistant.
+
+    Args:
+        dict_path (str): Path to the LSB dictionary file.
+        inst_path (str): Path to the assistant instructions file.
+        asst_id (str): The ID of the assistant to update or None to create a new one.
+        asst_name (str): The name of the assistant.
+        llm_model (str): The language model to use for the assistant.
+
+    Returns:
+        tuple: A tuple containing the OpenAI client, assistant ID, instructions, dictionary list, and cleaned dictionary list.
+    """
     print("\n-------------------------------")
-    print("INITATION\n")
+    print("INITIATION\n")
     client = openai.OpenAI()
 
     # Load glossary data and instructions
     glossary_data = load_file(dict_path)
     instructions = load_file(inst_path)
 
-    # Replace line breaks with comma
+    # Replace line breaks with space and convert to lists
     glossary_data = glossary_data.replace("\n", " ")
-    dictionary = text_to_list(glossary_data)
+    dictionary = glossary_data.split()
     dictionary.sort()
-    clean_dictionary = text_to_list(clean_text(glossary_data))
+    clean_dictionary = (clean_text(glossary_data)).split()
     clean_dictionary.sort()
     print("Dictionary loaded with", len(clean_dictionary), "words")
 
@@ -278,22 +369,34 @@ def asst_init(
         llm_model=llm_model,
         client=client, 
         instructions=instructions)
-    
+
     print("\n-------------------------------\n")
     return (client, assistant_id, instructions, dictionary, clean_dictionary)
 
 def asst_main(client, assistant_id, instructions, dictionary, clean_dictionary, sentence, T, P):
+    """
+    Main function to interpret a sentence using the assistant.
 
+    Args:
+        client (openai.OpenAI): The OpenAI API client instance.
+        assistant_id (str): The ID of the assistant to use.
+        instructions (str): Instructions for the assistant.
+        dictionary (list): A list of valid words.
+        clean_dictionary (list): A cleaned list of valid words.
+        sentence (str): The sentence to interpret.
+        T (float): Sampling temperature for the assistant's response.
+        P (float): Nucleus sampling parameter for the assistant's response.
+
+    Returns:
+        str or None: The interpreted sentence from the assistant if successful, otherwise None.
+    """
     # Create a new thread
     thread_id = createThread(client)
 
     print("\n-------------------------------")
     print("INTERPRETATION")
-    #print("Sentence: ", sentence)
-    #print("Dictionary: ", dictionary)
-    #print("Clean dictionary: ", clean_dictionary)
 
-    # interpret the sentence
+    # Interpret the sentence
     result = interpret(
         client=client, 
         thread_id=thread_id, 
@@ -302,8 +405,8 @@ def asst_main(client, assistant_id, instructions, dictionary, clean_dictionary, 
         dictionary=dictionary, 
         clean_dictionary=clean_dictionary, 
         sentence=sentence,
-        temperature = T,
-        top_p = P
+        temperature=T,
+        top_p=P
         )
     
     print("\n-------------------------------\n")
@@ -311,6 +414,10 @@ def asst_main(client, assistant_id, instructions, dictionary, clean_dictionary, 
     return result
 
 if __name__ == "__main__":
+    """
+    Entry point of the script. Initializes the assistant and processes a sample sentence multiple times,
+    writing the results to a specified file.
+    """
 
     # Constants
     INSTRUCTIONS = "data/instructions.txt"
@@ -326,11 +433,9 @@ if __name__ == "__main__":
     LLM_TEMPERATURE = 0.2
     LLM_TOP_P = 0.9
     
-    # t_init = 0.1
-    # p_init = 0.7
     sentence = "Hola, soy IVILSB!"
     
-    # initialize
+    # Initialize the assistant
     client, assistant_id, instructions, dictionary, clean_dictionary = asst_init(
         dict_path=DICTIONARY, 
         inst_path=INSTRUCTIONS, 
@@ -339,14 +444,7 @@ if __name__ == "__main__":
         llm_model=LLM_MODEL)
 
     with open(RESULTS, "w", encoding="utf-8") as file:
-        # for i in range(3):
-        #     for j in range(3):
-        #         t = round(t_init + 0.1*i, 1)
-        #         p = round(p_init + 0.1*j, 1)
-        #         file.write(f"T: {t}\n")
-        #         file.write(f"P: {p}\n\n")
         for k in range(3):
-            #print(f"t: {t}, p: {p}, k: {k}")
             result = asst_main(
                 client=client, 
                 assistant_id=assistant_id, 
