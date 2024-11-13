@@ -79,7 +79,7 @@ const Home = () => {
     <div className={`home ${deviceType}`}>
       <div className="header">
         <p className="logo">IVILSB</p>
-        <p className="title">Intérprete de Texto a Lenguaje de Señas Boliviano</p>
+        <p className="title">Intérprete de Texto a Lengua de Señas Boliviano</p>
       </div>
       <div className="home-container">
         <div className="left-pane">
