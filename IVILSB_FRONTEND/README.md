@@ -1,4 +1,6 @@
-## IVI LSB - FRONTEND
+## IVI LSB : FRONTEND
+
+Description - TODO
 
 ### Components Hierarchy
 
