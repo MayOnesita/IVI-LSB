@@ -1,0 +1,7 @@
+*.env
+*.txt
+*.log
+*.cmd
+
+node_modules
+package-lock.json

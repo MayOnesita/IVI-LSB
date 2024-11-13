@@ -1,0 +1,17 @@
+# Data
+# data/
+# complete_data/
+*.sqlite3
+*.bin
+
+# Python files 
+__pycache__/
+venv/
+.venv
+
+# Secret files
+env/
+.env
+
+# logs
+logs/full_data.txt

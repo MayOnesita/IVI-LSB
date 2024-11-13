@@ -1,0 +1,102 @@
+[
+    {
+        "name": "Hola",
+        "arms": "HOLA",
+        "face": "N"
+    },
+    {
+        "name": "Chau",
+        "arms": "CHAU",
+        "face": "N"
+    },
+    {
+        "name": "Permiso",
+        "arms": "PERMISO",
+        "face": "Depends"
+    },
+    {
+        "name": "Buenos d\u00edas",
+        "arms": "BUENOS_DIAS",
+        "face": "N"
+    },
+    {
+        "name": "Buenas tardes",
+        "arms": "BUENAS_TARDES",
+        "face": "N"
+    },
+    {
+        "name": "Gracias",
+        "arms": "GRACIAS",
+        "face": "N"
+    },
+    {
+        "name": "Buenas noches",
+        "arms": "BUENAS_NOCHES",
+        "face": "N"
+    },
+    {
+        "name": "Por favor",
+        "arms": "POR_FAVOR",
+        "face": "N"
+    },
+    {
+        "name": "\u00bfC\u00f3mo est\u00e1s?",
+        "arms": "COMO_ESTAS",
+        "face": "Worried"
+    },
+    {
+        "name": "Estoy bien",
+        "arms": "ESTOY_BIEN",
+        "face": "N"
+    },
+    {
+        "name": "Puedo ",
+        "arms": "PUEDO_",
+        "face": "N"
+    },
+    {
+        "name": "No puedo",
+        "arms": "NO_PUEDO",
+        "face": "Sad"
+    },
+    {
+        "name": "Mal",
+        "arms": "MAL",
+        "face": "Pain"
+    },
+    {
+        "name": "M\u00e1s o menos",
+        "arms": "MAS_O_MENOS",
+        "face": "Idk"
+    },
+    {
+        "name": "Nombre",
+        "arms": "NOMBRE",
+        "face": "N"
+    },
+    {
+        "name": "S\u00ed",
+        "arms": "SI",
+        "face": "N"
+    },
+    {
+        "name": "No",
+        "arms": "NO",
+        "face": "N"
+    },
+    {
+        "name": "Lo siento",
+        "arms": "LO_SIENTO",
+        "face": "Serious"
+    },
+    {
+        "name": "Te amo",
+        "arms": "TE_AMO",
+        "face": "Happy"
+    },
+    {
+        "name": "Hombre",
+        "arms": "HOMBRE",
+        "face": "N"
+    }
+]

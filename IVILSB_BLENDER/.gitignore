@@ -1,0 +1,4 @@
+*/__pycache__
+*.blend1
+OUTPUT/*
+COMPILER/client.json
