@@ -1,6 +1,6 @@
 [Home](../README.md)
 
-# IVI-LSB : Blender
+# IVILSB : Blender
 
 This project contains multiple tools for the project. Mainly, it contains two subprojects:
 - **BLENDER**: The blender plugin that allows to try poses, create poses and create the animations.
