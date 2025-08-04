@@ -1,4 +1,4 @@
-## Intérprete Virtual de Lengua de Señas Boliviana (IVI-LSB)
+## Intérprete Virtual de Lengua de Señas Boliviana (IVILSB)
 
 This project is a web page that allows users to write text in Spanish and have a virtual avatar to translate and interpret it into Bolivian Sign Language. 
 
