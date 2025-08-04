@@ -1,6 +1,6 @@
 [Home](../README.md)
 
-# IVI-LSB : Backend
+# IVILSB : Backend
 
 This project contains the back-end code for the IVILSB Web Page.
 
