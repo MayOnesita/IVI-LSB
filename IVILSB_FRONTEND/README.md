@@ -1,7 +1,7 @@
 [Home](../README.md)
 
 
-## IVI LSB : FRONTEND
+## IVILSB : FRONTEND
 
 Description - TODO
 
