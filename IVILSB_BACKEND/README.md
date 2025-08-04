@@ -2,7 +2,7 @@
 
 # IVI-LSB : Backend
 
-This project contains the back-end code for the IVI-LSB Web Page.
+This project contains the back-end code for the IVILSB Web Page.
 
 ### Description 
 
