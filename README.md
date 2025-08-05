@@ -1,6 +1,6 @@
 ## Intérprete Virtual de la Lengua de Señas Boliviana (IVILSB)
 
-This project is a web page that allows users to write text in Spanish and have a virtual avatar to translate and interpret it into Bolivian Sign Language. 
+This project is a web page that allows users to write text in Spanish and have a virtual avatar to translate and interpret it into Bolivian Sign Language.
 
 ---
 ### Context
@@ -24,7 +24,7 @@ BACK-END: A Python-based server connects to OpenAI’s GPT-4o model to convert S
 
 FRONT-END: A React-based web application renders the 3D avatar using Three.js and plays the appropriate sign animations based on the processed guide text. The interface is intuitive and mobile-friendly, with visual feedback and playback controls.
 
-Although still a prototype, this system aims to demonstrate a possible path toward making written Spanish more accessible for Deaf Bolivians. The approach is meant to be adaptable and extendable, offering a foundation that future projects can refine, expand, and build upon with the help of broader collaboration and more comprehensive datasets.
+Although still a prototype, this system aims to demonstrate a possible path toward making written Spanish more accessible for Deaf Bolivians. The approach is meant to be adaptable and extendable, offering a foundation that future projects can refine, expand, and build upon with the help of broader collaboration and more comprehensive datasets.  To view the project methodology and research documentation in greater detail, open the [**PDF document**](TFG_Mayra_Oropeza.pdf).
 
 ---
 ### Source Code
